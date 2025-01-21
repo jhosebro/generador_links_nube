@@ -4,7 +4,8 @@ import tkinter as tk
 from tkinter import filedialog
 import pandas as pd
 # * Debemos importar un excel que solo tenga una hoja para evitar que a la hora de hacer la copia no existan conflictos y que las columnas queden en la primera fila
-
+# ? Variables globales
+columnas_a_verificar = ["FotoLum1","FotoLum2","FotoLum3"] # * Columnas que se deben verificar en el archivo Excel
 
 # * Función para seleccionar y copiar el archivo Excel
 def seleccionar_y_copiar_excel():
@@ -35,31 +36,63 @@ def seleccionar_y_copiar_excel():
 
 def copiar_archivo(ruta_archivo_original):
     """
-    !Copia un archivo Excel desde la ruta proporcionada, lee su contenido y retorna la ruta de la copia.
+    ! Copia un archivo Excel desde la ruta proporcionada, lee su contenido y retorna la ruta de la copia.
     """
-    #* Obtenemos el nombre del archivo desde su ruta original
+    # * Obtenemos el nombre del archivo desde su ruta original
     nombre_archivo = os.path.basename(ruta_archivo_original)
-    #* Obtenemos el directorio donde se encuentra el archivo original
+    # * Obtenemos el directorio donde se encuentra el archivo original
     directorio = os.path.dirname(ruta_archivo_original)
-    #* Generamos la ruta para la copia del archivo
+    # * Generamos la ruta para la copia del archivo
     ruta_archivo_copia = os.path.join(directorio, f"copia_{nombre_archivo}")
     
     try:
         #! Intentamos copiar el archivo original a la nueva ubicación
         shutil.copy(ruta_archivo_original, ruta_archivo_copia)
         print("Archivo copiado con exito")
-        
-        #* Leemos el contenido del archivo copiado
-        contenido = pd.read_excel(ruta_archivo_copia)
-        
-        print(f"Primera fila del archivo copiado: {contenido.columns}") #? Imprime los nombres de las columnas
-        
-        return ruta_archivo_copia #* Retornamos la ruta del archivo copiado
+        return ruta_archivo_copia # * Retornamos la ruta del archivo copiado
     except Exception as e:
         #! Capturamos cualquier error que ocurra durante la copia o lectura del archivo
         print(f"Error al copiar el archivo: {e}")
         return None
+
+# * Función para verificar si las columnas en las que vamos a colocar los links existen en el archivo Excel
+def verificar_columnas(ruta_archivo, columnas_a_verificar):
+    """
+    ! Verifica si las columnas a verificar existen en el archivo Excel.
     
-#//*Ejecutamos la funcion
+    :param ruta_archivo: Ruta del archivo Excel a verificar.
+    :param columnas_a_verificar: Lista de columnas a verificar.
+    :return: Mensaje de éxito al verificar que existen o fueron creadas o error.    
+    """
+    try:
+        # * Cargamos el archivo Excel en un DataFrame
+        contenido = pd.read_excel(ruta_archivo)
+        
+        # * Obtenermos las columnas del archivo
+        columnas_actuales = contenido.columns.to_list()
+        
+        # * Verificamos si las columnas a verificar existen en el archivo
+        columnas_faltantes = [col for col in columnas_a_verificar if col not in columnas_actuales]
+        
+        if columnas_faltantes:
+            # * Si faltan columnas, se crean
+            for col in columnas_faltantes:
+                contenido[col] = ""
+            # * Guardamos el archivo con las columnas nuevas
+            contenido.to_excel(ruta_archivo, index=False)
+            print(f"Se crearon las columnas: {columnas_faltantes}")
+        else:
+            # * Si todas las columnas existen
+            print("Todas las columnas existen")
+            return None
+        
+    except Exception as e:
+        # * Capturamos cualquier error que ocurra al leer el archivo
+        print(f"Error al leer el archivo: {e}")
+        return e
+
+
+# * Ejecutamos la funcion
 archivo = seleccionar_y_copiar_excel()
 
+verificar_columnas(archivo, columnas_a_verificar)
