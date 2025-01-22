@@ -1,0 +1,39 @@
+# Archivos temporales del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos generados por Python
+*.pyc
+*.pyo
+__pycache__/
+*.egg-info/
+.eggs/
+.env
+
+# Entornos virtuales
+env/
+venv/
+.venv/
+
+# Archivos de datos
+*.xlsx
+*.xls
+*.csv
+*.tmp
+
+# Logs y cobertura de código
+*.log
+.pytest_cache/
+coverage/
+*.coverage
+.cache/
+
+# Configuración del editor
+.vscode/
+.idea/
+
+# Otros binarios
+*.exe
+*.dll
+*.o
