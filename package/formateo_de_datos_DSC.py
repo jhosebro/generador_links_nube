@@ -190,7 +190,6 @@ def modificar_valores_por_formato(dataframe, columna_origen, columna_destino1, c
         elif re.match(r"^\d+-+IMG_\d+$", valor_str): # * Si el valor es un string que empieza con un número seguido de un guion y 'IMG_' seguido de un número
             partes = valor_str.split("-")
             numero = partes[0]
-            img_parte = partes[1:]
             if len(numero) == 3:
                 dataframe.at[i, columna_destino1] = f"DSC00{numero}"
                 dataframe.at[i, columna_destino2] = "La foto es del Formato IMG"
@@ -204,7 +203,43 @@ def modificar_valores_por_formato(dataframe, columna_origen, columna_destino1, c
         elif re.match(r"^\d\.\d+E\+\d+$", valor_str):
             dataframe.at[i, columna_destino1] = "No tenemos foto para clasificar"
             dataframe.at[i, columna_destino2] = "No tenemos foto para clasificar"
+        
+        elif re.match(r"^DSC\d{5}$", valor_str):  # * Si el valor es un string que empieza con 'DSC' seguido de un número de 5 cifras
+            dataframe.at[i, columna_destino1] = valor_str  
+            dataframe.at[i, columna_destino2] = "Solo existe una fotografía"
             
+        elif re.match(r"^\d+--\d+$", valor_str):  # * Si el valor es un rango de números separados por guiones y termina en guion
+            numeros = valor_str.split("--")  
+            primer_numero = numeros[0]
+            segundo_numero = numeros[-1]
+            if len(primer_numero) == 4:
+                dataframe.at[i, columna_destino1] = f"DSC0{primer_numero}"
+            if len(segundo_numero) == 4:
+                dataframe.at[i, columna_destino2] = f"DSC0{segundo_numero}"
+        
+        elif re.match(r"^\d+-DSCN\d+$", valor_str):  # * Si el valor es un rango de números separados por guiones y termina en guion
+            numeros = valor_str.split("-")
+            primer_numero = numeros[0]
+            dscn_numero = numeros[1].replace("DSCN", "DSC")
+            if len(primer_numero) == 4:
+                dataframe.at[i, columna_destino1] = f"DSC0{primer_numero}"
+            elif len(primer_numero) == 5:
+                dataframe.at[i, columna_destino1] = f"DSC{primer_numero}"
+            if len(dscn_numero) == 7:  
+                dataframe.at[i, columna_destino2] = dscn_numero
+            elif len(dscn_numero) == 4:  
+                dataframe.at[i, columna_destino2] = f"DSC00{dscn_numero}"
+        
+        elif re.match(r"^\d+-DSC\d+$", valor_str):  # * Si el valor es un rango de números separados por guiones y termina en guion
+            numeros = valor_str.split("-")
+            primer_numero = numeros[0]
+            dsc_numero = numeros[1]
+            if len(primer_numero) == 4:
+                dataframe.at[i, columna_destino1] = f"DSC0{primer_numero}"
+            elif len(primer_numero) == 5:
+                dataframe.at[i, columna_destino1] = f"DSC{primer_numero}"
+                dataframe.at[i, columna_destino2] = dsc_numero 
+        
         else:
             dataframe.at[i, columna_destino1] = "Formato sin clasificar"
             dataframe.at[i, columna_destino2] = "Formato sin clasificar"
